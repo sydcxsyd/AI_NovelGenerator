@@ -11,6 +11,15 @@
             "timeout": 600,
             "interface_format": "OpenAI"
         },
+        "DeepSeek V4": {
+            "api_key": "",
+            "base_url": "https://api.deepseek.com/v1",
+            "model_name": "deepseek-chat",
+            "temperature": 0.7,
+            "max_tokens": 8192,
+            "timeout": 600,
+            "interface_format": "OpenAI"
+        },
         "GPT 5": {
             "api_key": "",
             "base_url": "https://api.openai.com/v1",
@@ -62,7 +71,7 @@
     "choose_configs": {
         "prompt_draft_llm": "DeepSeek V3",
         "chapter_outline_llm": "DeepSeek V3",
-        "architecture_llm": "Gemini 2.5 Pro",
+        "architecture_llm": "Gemini 2.5 Flash",
         "final_chapter_llm": "GPT 5",
         "consistency_review_llm": "DeepSeek V3"
     },

@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 import os
 import threading
+import time
+import json
 import tkinter as tk
 from tkinter import messagebox
 import customtkinter as ctk
@@ -33,6 +35,7 @@ def generate_novel_architecture_ui(self):
             return
 
         self.disable_button_safe(self.btn_generate_architecture)
+        stop_monitor = None
         try:
 
 
@@ -54,6 +57,38 @@ def generate_novel_architecture_ui(self):
             user_guidance = self.user_guide_text.get("0.0", "end").strip()
 
             self.safe_log("开始生成小说架构...")
+
+            progress_labels = {
+                "core_seed_result": "进度 1/5：核心种子已生成",
+                "character_dynamics_result": "进度 2/5：角色动力学已生成",
+                "character_state_result": "进度 3/5：初始角色状态已生成",
+                "world_building_result": "进度 4/5：世界观已生成",
+                "plot_arch_result": "进度 5/5：三幕式情节架构已生成",
+            }
+
+            stop_monitor = threading.Event()
+
+            def monitor_architecture_progress():
+                partial_path = os.path.join(filepath, "partial_architecture.json")
+                seen_keys = set()
+                self.safe_log("进度 0/5：已提交生成请求，正在调用模型...")
+                while not stop_monitor.is_set():
+                    try:
+                        if os.path.exists(partial_path):
+                            with open(partial_path, "r", encoding="utf-8") as f:
+                                partial_data = json.load(f)
+                            for key, label in progress_labels.items():
+                                if key in partial_data and key not in seen_keys:
+                                    seen_keys.add(key)
+                                    self.safe_log(label)
+                    except Exception:
+                        # 监控日志失败不影响主流程
+                        pass
+                    time.sleep(0.8)
+
+            monitor_thread = threading.Thread(target=monitor_architecture_progress, daemon=True)
+            monitor_thread.start()
+
             Novel_architecture_generate(
                 interface_format=interface_format,
                 api_key=api_key,
@@ -69,8 +104,13 @@ def generate_novel_architecture_ui(self):
                 timeout=timeout_val,
                 user_guidance=user_guidance  # 添加内容指导参数
             )
+
+            if stop_monitor:
+                stop_monitor.set()
             self.safe_log("✅ 小说架构生成完成。请在 'Novel Architecture' 标签页查看或编辑。")
         except Exception:
+            if stop_monitor:
+                stop_monitor.set()
             self.handle_exception("生成小说架构时出错")
         finally:
             self.enable_button_safe(self.btn_generate_architecture)

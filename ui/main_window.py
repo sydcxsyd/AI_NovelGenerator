@@ -77,6 +77,39 @@ class NovelGeneratorGUI:
         llm_conf = next(iter(self.loaded_config["llm_configs"].values()))
         choose_configs = self.loaded_config.get("choose_configs", {})
 
+        def resolve_llm_choice(selected_name: str, preferred_keyword: str = "") -> str:
+            llm_configs = self.loaded_config.get("llm_configs", {})
+            available_names = list(llm_configs.keys())
+            if not available_names:
+                return ""
+
+            # Handle renamed presets from older config versions.
+            alias_map = {
+                "Gemini 2.0 Flash": "Gemini 2.5 Flash",
+                "Gemini 2.5 Pro": "Gemini 2.5 Flash",
+            }
+
+            if selected_name in llm_configs:
+                return selected_name
+
+            mapped_name = alias_map.get(selected_name)
+            if mapped_name and mapped_name in llm_configs:
+                return mapped_name
+
+            if selected_name:
+                selected_lower = selected_name.lower()
+                for name in available_names:
+                    if selected_lower in name.lower():
+                        return name
+
+            if preferred_keyword:
+                preferred_lower = preferred_keyword.lower()
+                for name in available_names:
+                    if preferred_lower in name.lower():
+                        return name
+
+            return available_names[0]
+
 
         if self.loaded_config and "embedding_configs" in self.loaded_config and last_embedding in self.loaded_config["embedding_configs"]:
             emb_conf = self.loaded_config["embedding_configs"][last_embedding]
@@ -122,11 +155,32 @@ class NovelGeneratorGUI:
 
 
         # -- 生成配置相关 --
-        self.architecture_llm_var = ctk.StringVar(value=choose_configs.get("architecture_llm", "DeepSeek"))
-        self.chapter_outline_llm_var = ctk.StringVar(value=choose_configs.get("chapter_outline_llm", "DeepSeek"))
-        self.final_chapter_llm_var = ctk.StringVar(value=choose_configs.get("final_chapter_llm", "DeepSeek"))
-        self.consistency_review_llm_var = ctk.StringVar(value=choose_configs.get("consistency_review_llm", "DeepSeek"))
-        self.prompt_draft_llm_var = ctk.StringVar(value=choose_configs.get("prompt_draft_llm", "DeepSeek"))
+        self.architecture_llm_var = ctk.StringVar(
+            value=resolve_llm_choice(choose_configs.get("architecture_llm", ""), "gemini")
+        )
+        self.chapter_outline_llm_var = ctk.StringVar(
+            value=resolve_llm_choice(choose_configs.get("chapter_outline_llm", ""), "deepseek")
+        )
+        self.final_chapter_llm_var = ctk.StringVar(
+            value=resolve_llm_choice(choose_configs.get("final_chapter_llm", ""), "gpt")
+        )
+        self.consistency_review_llm_var = ctk.StringVar(
+            value=resolve_llm_choice(choose_configs.get("consistency_review_llm", ""), "deepseek")
+        )
+        self.prompt_draft_llm_var = ctk.StringVar(
+            value=resolve_llm_choice(choose_configs.get("prompt_draft_llm", ""), "deepseek")
+        )
+
+        sanitized_choose_configs = {
+            "architecture_llm": self.architecture_llm_var.get(),
+            "chapter_outline_llm": self.chapter_outline_llm_var.get(),
+            "prompt_draft_llm": self.prompt_draft_llm_var.get(),
+            "final_chapter_llm": self.final_chapter_llm_var.get(),
+            "consistency_review_llm": self.consistency_review_llm_var.get(),
+        }
+        if choose_configs != sanitized_choose_configs:
+            self.loaded_config["choose_configs"] = sanitized_choose_configs
+            save_config(self.loaded_config, self.config_file)
 
 
 

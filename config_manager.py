@@ -90,7 +90,7 @@ def create_config(config_file: str) -> dict:
     "choose_configs": {
         "prompt_draft_llm": "DeepSeek V3",
         "chapter_outline_llm": "DeepSeek V3",
-        "architecture_llm": "Gemini 2.0 Flash",
+        "architecture_llm": "Gemini 2.5 Flash",
         "final_chapter_llm": "GPT 5",
         "consistency_review_llm": "DeepSeek V3"
     },
