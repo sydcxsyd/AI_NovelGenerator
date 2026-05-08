@@ -12,6 +12,7 @@ import glob
 from utils import read_file, save_string_to_txt, clear_file_content, get_word_count
 from novel_generator import (
     Novel_architecture_generate,
+    optimize_novel_architecture,
     Chapter_blueprint_generate,
     generate_chapter_draft,
     finalize_chapter,
@@ -160,6 +161,55 @@ def generate_chapter_blueprint_ui(self):
             self.handle_exception("生成章节蓝图时出错")
         finally:
             self.enable_button_safe(self.btn_generate_directory)
+    threading.Thread(target=task, daemon=True).start()
+
+def optimize_novel_architecture_ui(self):
+    filepath = self.filepath_var.get().strip()
+    if not filepath:
+        messagebox.showwarning("警告", "请先选择保存文件路径")
+        return
+
+    def task():
+        if not messagebox.askyesno("确认", "确定要优化已生成的小说架构吗？"):
+            self.enable_button_safe(self.btn_optimize_architecture)
+            return
+
+        self.disable_button_safe(self.btn_optimize_architecture)
+        try:
+            interface_format = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["interface_format"]
+            api_key = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["api_key"]
+            base_url = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["base_url"]
+            model_name = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["model_name"]
+            temperature = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["temperature"]
+            max_tokens = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["max_tokens"]
+            timeout_val = self.loaded_config["llm_configs"][self.architecture_llm_var.get()]["timeout"]
+
+            genre = self.genre_var.get().strip()
+            num_chapters = self.safe_get_int(self.num_chapters_var, 10)
+            word_number = self.safe_get_int(self.word_number_var, 3000)
+            user_guidance = self.user_guide_text.get("0.0", "end").strip()
+
+            self.safe_log("开始优化小说架构...")
+            optimize_novel_architecture(
+                interface_format=interface_format,
+                api_key=api_key,
+                base_url=base_url,
+                llm_model=model_name,
+                filepath=filepath,
+                genre=genre,
+                number_of_chapters=num_chapters,
+                word_number=word_number,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=timeout_val,
+                user_guidance=user_guidance,
+            )
+            self.safe_log("✅ 小说架构优化完成。请在 'Novel Architecture' 标签页查看或编辑。")
+        except Exception:
+            self.handle_exception("优化小说架构时出错")
+        finally:
+            self.enable_button_safe(self.btn_optimize_architecture)
+
     threading.Thread(target=task, daemon=True).start()
 
 def generate_chapter_draft_ui(self):

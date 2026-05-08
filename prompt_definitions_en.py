@@ -265,6 +265,50 @@ Each phase must include 3 key turning points and their corresponding foreshadowi
 Output the final text only, do not explain anything.
 """
 
+# =============== 4.5 Architecture Optimization (Adversarial Critique) ===================
+architecture_optimization_prompt = """\
+You are now acting as a demanding novel architect and story doctor. Critically challenge the generated novel architecture and upgrade it while preserving its strongest core strengths.
+
+Generated architecture:
+{novel_architecture}
+
+Additional information:
+- Content guidance: {user_guidance}
+- Genre: {genre}
+- Total chapters: {number_of_chapters}
+- Target words per chapter: {word_number}
+
+Complete the work in two internal stages, but output only the optimized full architecture.
+
+Stage 1: Critical diagnosis
+Focus on checking the following:
+1. Whether the core conflict is sharp enough, or if the goal, motivation, or cost of failure is vague.
+2. Whether the character dynamics are flat, loosely connected, repetitive in conflict, or lacking in arc progression.
+3. Whether the worldbuilding truly serves the plot, or suffers from lore dumping, cost-free rules, or unclear resource conflict.
+4. Whether the three-act structure has weak propulsion, a sagging middle, predictable twists, or a prematurely spent climax.
+5. Whether suspense, foreshadowing, and cognitive reversals build progressively rather than staying flat.
+
+Stage 2: Adversarial optimization
+Based on the diagnosis, rewrite and strengthen the full architecture with these requirements:
+1. Preserve the most distinctive original selling points.
+2. Make the main objective, opposing resistance, and failure cost clearer.
+3. Strengthen value conflicts, alliance shifts, and potential betrayals among characters.
+4. Bind world rules tightly to plot choices so the setting is not just decorative background.
+5. Improve three-act pacing so each act has clear escalation and irreversible change.
+6. Add stronger foreshadowing payoff paths and more room for cognitive reversals.
+7. The output must be directly usable for later chapter outline generation.
+
+Output requirements:
+1. Output only the optimized full architecture. No explanation, no analysis, no annotations.
+2. Keep the structure as close as possible to the original format so downstream steps can consume it directly.
+3. Preserve the following section headings:
+#=== 0) Novel Setup ===
+#=== 1) Core Seed ===
+#=== 2) Character Dynamics ===
+#=== 3) Worldbuilding ===
+#=== 4) Three-Act Plot Architecture ===
+"""
+
 # =============== 5. Chapter Outline Generation (Suspense Rhythm Curve) ===================
 chapter_blueprint_prompt = """\
 Based on the following elements:

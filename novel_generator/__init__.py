@@ -1,5 +1,5 @@
 #novel_generator/__init__.py
-from .architecture import Novel_architecture_generate
+from .architecture import Novel_architecture_generate, optimize_novel_architecture
 from .blueprint import Chapter_blueprint_generate
 from .chapter import (
     get_last_n_chapters_text,

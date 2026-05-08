@@ -20,6 +20,7 @@ from ui.config_tab import build_config_tabview, load_config_btn, save_config_btn
 from ui.novel_params_tab import build_novel_params_area, build_optional_buttons_area
 from ui.generation_handlers import (
     generate_novel_architecture_ui,
+    optimize_novel_architecture_ui,
     generate_chapter_blueprint_ui,
     generate_chapter_draft_ui,
     finalize_chapter_ui,
@@ -471,6 +472,7 @@ class NovelGeneratorGUI:
 
     # ----------------- 将导入的各模块函数直接赋给类方法 -----------------
     generate_novel_architecture_ui = generate_novel_architecture_ui
+    optimize_novel_architecture_ui = optimize_novel_architecture_ui
     generate_chapter_blueprint_ui = generate_chapter_blueprint_ui
     generate_chapter_draft_ui = generate_chapter_draft_ui
     finalize_chapter_ui = finalize_chapter_ui

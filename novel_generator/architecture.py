@@ -200,3 +200,56 @@ def Novel_architecture_generate(
     if os.path.exists(partial_arch_file):
         os.remove(partial_arch_file)
         logging.info("partial_architecture.json removed (all steps completed).")
+
+def optimize_novel_architecture(
+    interface_format: str,
+    api_key: str,
+    base_url: str,
+    llm_model: str,
+    filepath: str,
+    genre: str,
+    number_of_chapters: int,
+    word_number: int,
+    user_guidance: str = "",
+    temperature: float = 0.7,
+    max_tokens: int = 2048,
+    timeout: int = 600
+) -> None:
+    """
+    读取已有 Novel_architecture.txt，通过批判式对抗提示词进行整体重写优化，
+    并将优化结果覆盖回原文件，供后续目录生成直接使用。
+    """
+    arch_file = os.path.join(filepath, "Novel_architecture.txt")
+    if not os.path.exists(arch_file):
+        raise FileNotFoundError("Novel_architecture.txt not found. Please generate architecture first.")
+
+    with open(arch_file, "r", encoding="utf-8") as f:
+        novel_architecture = f.read().strip()
+
+    if not novel_architecture:
+        raise ValueError("Novel_architecture.txt is empty. Please generate architecture first.")
+
+    llm_adapter = create_llm_adapter(
+        interface_format=interface_format,
+        base_url=base_url,
+        model_name=llm_model,
+        api_key=api_key,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        timeout=timeout
+    )
+
+    prompt = prompt_definitions.architecture_optimization_prompt.format(
+        novel_architecture=novel_architecture,
+        user_guidance=user_guidance,
+        genre=genre,
+        number_of_chapters=number_of_chapters,
+        word_number=word_number,
+    )
+    optimized_architecture = invoke_with_cleaning(llm_adapter, prompt)
+    if not optimized_architecture.strip():
+        raise ValueError("Architecture optimization failed and returned empty content.")
+
+    clear_file_content(arch_file)
+    save_string_to_txt(optimized_architecture, arch_file)
+    logging.info("Novel_architecture.txt has been optimized successfully.")
